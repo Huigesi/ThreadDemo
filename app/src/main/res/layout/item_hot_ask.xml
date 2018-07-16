@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:background="@color/white"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal"
+        android:id="@+id/hot_title">
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:id="@+id/img_hot_ask"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_hot_title"
+            android:layout_marginLeft="5dp"
+            android:textColor="@color/black"
+            android:text="最新热门问题"/>
+    </LinearLayout>
+    <android.support.v7.widget.RecyclerView
+        android:layout_below="@+id/hot_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/rv_hot_ask"
+        android:layout_marginLeft="25dp">
+
+    </android.support.v7.widget.RecyclerView>
+    <TextView
+        android:layout_below="@+id/rv_hot_ask"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_hot_ask"
+        android:text="查看更多 >"
+        android:textColor="@color/colorPrimary"
+        android:gravity="center"
+        />
+</RelativeLayout>
