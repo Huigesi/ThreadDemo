@@ -46,10 +46,8 @@ public class ViewPagerAdapter extends PagerAdapter {
         View view = list.get(position);
         if (view==null){
             String imagePath = mImageList.get(position);
-
             view = LayoutInflater.from(context).inflate(R.layout.item_banner, container, false);
             ImageView imageView = view.findViewById(R.id.iv_banner);
-            Log.i(TAG, "instantiateItem: "+imagePath);
             Glide.with(context)
                     .load(imagePath)
                    .into(imageView);

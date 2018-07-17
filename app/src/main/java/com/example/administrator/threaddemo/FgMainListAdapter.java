@@ -34,10 +34,15 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     private List<String> mImageList = new ArrayList<String>();
     private List<UserBean> userBeans = new ArrayList<>();
-    private List<View> dots;
-    private int oldPoints=0;
-
+    private List<View> dots = new ArrayList<View>();;
+    private int oldPoints = 0;
+    private TimerTask timerTask;
+    private Timer timer = new Timer();
     private Context context;
+    private MyItemDecoration itemDecoration=new MyItemDecoration();
+    private boolean isAddItemDecoration = false;
+
+
 
     public FgMainListAdapter(Context context) {
         this.context = context;
@@ -93,36 +98,36 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(context);
             viewPagerAdapter.setData(mImageList);
             ((BannerViewHolder) holder).viewPager.setAdapter(viewPagerAdapter);
-            final Handler handler=new Handler(new Handler.Callback() {
+            final Handler handler = new Handler(new Handler.Callback() {
                 @Override
                 public boolean handleMessage(Message msg) {
                     if (msg.what == 1) {
-                        Log.i(TAG, "handleMessage: "+((BannerViewHolder) holder).viewPager.getCurrentItem());
-                        if (((BannerViewHolder) holder).viewPager.getCurrentItem()==2){
+                        if (((BannerViewHolder) holder).viewPager.getCurrentItem() == 2) {
                             ((BannerViewHolder) holder).viewPager.setCurrentItem(0);
-                        }else {
-                            ((BannerViewHolder) holder).viewPager.setCurrentItem(((BannerViewHolder) holder).viewPager.getCurrentItem()+1);
+                        } else {
+                            ((BannerViewHolder) holder).viewPager.setCurrentItem(((BannerViewHolder) holder).viewPager.getCurrentItem() + 1);
                         }
-
                     }
-
                     return false;
                 }
             });
-            TimerTask timerTask=new TimerTask() {
-                @Override
-                public void run() {
-                    handler.sendEmptyMessage(1);
-                }
-            };
-            Timer timer = new Timer();
-            timer.schedule(timerTask,1000,2000);
-            dots = new ArrayList<View>();
-            dots.add(((BannerViewHolder) holder).dots_1);
-            dots.add(((BannerViewHolder) holder).dots_2);
-            dots.add(((BannerViewHolder) holder).dots_3);
-            //第一个圆点设置为黑色
-            dots.get(0).setBackgroundResource(R.drawable.indicator_on);
+            if (timerTask == null) {
+                timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        handler.sendEmptyMessage(1);
+                    }
+                };
+                timer.schedule(timerTask, 1000, 2000);
+            }
+
+            if (isAddItemDecoration==false){
+                dots.add(((BannerViewHolder) holder).dots_1);
+                dots.add(((BannerViewHolder) holder).dots_2);
+                dots.add(((BannerViewHolder) holder).dots_3);
+                dots.get(0).setBackgroundResource(R.drawable.indicator_on);
+            }
+
             ((BannerViewHolder) holder).viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
                 public void onPageScrolled(int position, float positionOffset,
@@ -143,11 +148,14 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             });
 
         } else if (holder instanceof ListViewHolder) {
-
-            ItemAskAdapter itemAskAdapter = new ItemAskAdapter(context);
+            ItemAskAdapter itemAskAdapter = new ItemAskAdapter(context);;
             itemAskAdapter.setData(userBeans);
             ((ListViewHolder) holder).rvAskList.setAdapter(itemAskAdapter);
-            ((ListViewHolder) holder).rvAskList.addItemDecoration(new MyItemDecoration());
+            if (isAddItemDecoration==false){
+                ((ListViewHolder) holder).rvAskList.addItemDecoration(itemDecoration);
+                isAddItemDecoration=true;
+            }
+            Log.i(TAG, "onBindViewHolder: add");
             ((ListViewHolder) holder).rvAskList.setLayoutManager(new LinearLayoutManager(context));
         } else if (holder instanceof HotAskViewHolder) {
             /* */
@@ -161,7 +169,6 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 hotAskBean.setImgPath("");
                 hotAskBeans.add(hotAskBean);
             }
-            Log.i(TAG, "onBindViewHolder: " + hotAskBeans.size());
             askListAdapter.setData(hotAskBeans);
             ((HotAskViewHolder) holder).rvHotAsk.setLayoutManager(new LinearLayoutManager(context));
             ((HotAskViewHolder) holder).rvHotAsk.setAdapter(askListAdapter);
@@ -175,7 +182,6 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 hotVideoBean.setDetail("视频标题" + i);
                 hotVideoBeans.add(hotVideoBean);
             }
-            Log.i(TAG, "onBindViewHolder: " + hotVideoBeans.size());
             askListAdapter.setData(hotVideoBeans);
             ((HotVideoViewHolder) holder).rvHotVideo.setLayoutManager(new GridLayoutManager(context, 2));
             ((HotVideoViewHolder) holder).rvHotVideo.setAdapter(askListAdapter);
@@ -189,7 +195,6 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 hotVideoBean.setDetail("歌唱" + i);
                 hotVideoBeans.add(hotVideoBean);
             }
-            Log.i(TAG, "onBindViewHolder: " + hotVideoBeans.size());
             singListAdapter.setData(hotVideoBeans);
             ((SingViewHolder) holder).rvSingVideo.setLayoutManager(new GridLayoutManager(context, 3));
             ((SingViewHolder) holder).rvSingVideo.setAdapter(singListAdapter);
@@ -203,7 +208,6 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 hotVideoBean.setDetail("pia" + i);
                 hotVideoBeans.add(hotVideoBean);
             }
-            Log.i(TAG, "onBindViewHolder: " + hotVideoBeans.size());
             piaListAdapter.setData(hotVideoBeans);
             ((PiaViewHolder) holder).rvPiaVideo.setLayoutManager(new GridLayoutManager(context, 3));
             ((PiaViewHolder) holder).rvPiaVideo.setAdapter(piaListAdapter);
