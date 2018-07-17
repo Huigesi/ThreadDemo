@@ -121,31 +121,9 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 timer.schedule(timerTask, 1000, 2000);
             }
 
-            if (isAddItemDecoration==false){
-                dots.add(((BannerViewHolder) holder).dots_1);
-                dots.add(((BannerViewHolder) holder).dots_2);
-                dots.add(((BannerViewHolder) holder).dots_3);
-                dots.get(0).setBackgroundResource(R.drawable.indicator_on);
-            }
 
-            ((BannerViewHolder) holder).viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset,
-                                           int positionOffsetPixels) {
-                }
+            ((BannerViewHolder) holder).dotsIndicator.setViewPager(((BannerViewHolder) holder).viewPager);
 
-                @Override
-                public void onPageSelected(int position) {
-                    dots.get(oldPoints).setBackgroundResource(R.drawable.indicator_off);
-                    dots.get(position).setBackgroundResource(R.drawable.indicator_on);
-                    oldPoints = position;
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int state) {
-
-                }
-            });
 
         } else if (holder instanceof ListViewHolder) {
             ItemAskAdapter itemAskAdapter = new ItemAskAdapter(context);;
@@ -275,17 +253,15 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     protected class BannerViewHolder extends RecyclerView.ViewHolder {
         //private Banner banner;
         private ViewPager viewPager;
-        private View dots_1;
-        private View dots_2;
-        private View dots_3;
+        private DotsIndicator dotsIndicator;
 
         public BannerViewHolder(View view) {
             super(view);
             //banner = (Banner) view.findViewById(R.id.banner);
             viewPager = (ViewPager) view.findViewById(R.id.vp_banner);
-            dots_1 = (View) view.findViewById(R.id.dots_1);
-            dots_2 = (View) view.findViewById(R.id.dots_2);
-            dots_3 = (View) view.findViewById(R.id.dots_3);
+
+            dotsIndicator = (DotsIndicator) view.findViewById(R.id.dots_indicator);
+
         }
     }
 
