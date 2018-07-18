@@ -62,7 +62,32 @@ public class Test extends Fragment {
     public Test() {
 
     }
-
+/*  ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(context,imageList);
+            ((SoundHeadViewHolder) holder).vpBanner.setAdapter(viewPagerAdapter);
+            final Handler handler = new Handler(new Handler.Callback() {
+                @Override
+                public boolean handleMessage(Message msg) {
+                    if (msg.what == 1) {
+                        if (((SoundHeadViewHolder) holder).vpBanner.getCurrentItem() == 2) {
+                            ((SoundHeadViewHolder) holder).vpBanner.setCurrentItem(0);
+                        } else {
+                            ((SoundHeadViewHolder) holder).vpBanner.setCurrentItem(((SoundHeadViewHolder) holder).vpBanner.getCurrentItem() + 1);
+                        }
+                    }
+                    return false;
+                }
+            });
+            if (timerTask == null) {
+                timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        handler.sendEmptyMessage(1);
+                    }
+                };
+                timer.schedule(timerTask, 1000, 2000);
+            }
+            ((SoundHeadViewHolder) holder).dotsIndicator.setViewPager(((SoundHeadViewHolder) holder).vpBanner);
+            */
 
 
 }

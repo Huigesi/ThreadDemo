@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <declare-styleable name="AutoScrollViewPager">
+    <attr name="slideInterval" format="integer" />
+    <attr name="slideDirection" format="enum">
+      <enum name="left" value="0" />
+      <enum name="right" value="1" />
+    </attr>
+    <attr name="stopWhenTouch" format="boolean" />
+    <attr name="cycle" format="boolean" />
+    <attr name="slideDuration" format="integer" />
+  </declare-styleable>
   <attr format="color" name="dotsColor"/>
   <attr format="color" name="dotsStrokeColor"/>
   <attr format="dimension" name="dotsSize"/>

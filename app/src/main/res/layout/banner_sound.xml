@@ -8,15 +8,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="10dp"
-        android:id="@+id/vp_banner"></android.support.v4.view.ViewPager>
-  <!--  <com.example.administrator.threaddemo.BannerViewPager
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="10dp"
-        android:id="@+id/vp_banner"></com.example.administrator.threaddemo.BannerViewPager>-->
+        android:id="@+id/vp_banner_sound"></android.support.v4.view.ViewPager>
+
    <com.example.administrator.threaddemo.DotsIndicator
-        android:id="@+id/banner_indicator"
-        android:layout_margin="15dp"
+        android:id="@+id/dots_indicator_sound"
+        android:layout_margin="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:dotsColor="@color/white"
@@ -27,5 +23,4 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         />
-
 </RelativeLayout>

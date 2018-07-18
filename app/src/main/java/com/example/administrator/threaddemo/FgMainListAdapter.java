@@ -1,8 +1,6 @@
 package com.example.administrator.threaddemo;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
@@ -16,6 +14,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.example.administrator.threaddemo.viewPagerIndicator.BannerComponent;
+import com.example.administrator.threaddemo.viewPagerIndicator.Indicator;
+import com.example.administrator.threaddemo.viewPagerIndicator.IndicatorViewPager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,15 +35,30 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     private List<String> mImageList = new ArrayList<String>();
     private List<UserBean> userBeans = new ArrayList<>();
-    private List<View> dots = new ArrayList<View>();;
+    private List<View> dots = new ArrayList<View>();
+    private RecyclerView.ViewHolder bannerView;
     private int oldPoints = 0;
     private TimerTask timerTask;
     private Timer timer = new Timer();
     private Context context;
-    private MyItemDecoration itemDecoration=new MyItemDecoration();
     private boolean isAddItemDecoration = false;
+    private View headerView;
+    MyItemDecoration itemDecoration = new MyItemDecoration();
+    private BannerComponent bannerComponent;
 
+    public View getHeaderView() {
+        return headerView;
+    }
 
+    public void setHeaderView(View headerView) {
+        this.headerView = headerView;
+        notifyItemInserted(0);
+    }
+
+    public int getRealPosition(BannerViewHolder holder) {
+        int position = holder.getLayoutPosition();
+        return headerView == null ? position : position - 1;
+    }
 
     public FgMainListAdapter(Context context) {
         this.context = context;
@@ -56,9 +72,14 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == TYPE_HEADER) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.banner, parent, false);
-            return new BannerViewHolder(view);
+            if (bannerView != null) {
+                return bannerView;
+            } else {
+                View view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.banner, parent, false);
+                bannerView = new BannerViewHolder(view);
+                return bannerView;
+            }
         } else if (viewType == TYPE_HOT_ASK) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_hot_ask, parent, false);
@@ -94,44 +115,29 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
+        if (bannerComponent != null) {
+            bannerComponent.setAutoPlayTime(2000);
+            bannerComponent.startAutoPlay();
+
+        }
         if (holder instanceof BannerViewHolder) {
-            ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(context);
-            viewPagerAdapter.setData(mImageList);
-            ((BannerViewHolder) holder).viewPager.setAdapter(viewPagerAdapter);
-            final Handler handler = new Handler(new Handler.Callback() {
-                @Override
-                public boolean handleMessage(Message msg) {
-                    if (msg.what == 1) {
-                        if (((BannerViewHolder) holder).viewPager.getCurrentItem() == 2) {
-                            ((BannerViewHolder) holder).viewPager.setCurrentItem(0);
-                        } else {
-                            ((BannerViewHolder) holder).viewPager.setCurrentItem(((BannerViewHolder) holder).viewPager.getCurrentItem() + 1);
-                        }
-                    }
-                    return false;
-                }
-            });
-            if (timerTask == null) {
-                timerTask = new TimerTask() {
-                    @Override
-                    public void run() {
-                        handler.sendEmptyMessage(1);
-                    }
-                };
-                timer.schedule(timerTask, 1000, 2000);
+            if (bannerComponent == null) {
+                bannerComponent = new BannerComponent(((BannerViewHolder) holder).dotsIndicator,
+                        ((BannerViewHolder) holder).viewPager, false);
             }
-
-
+            ((BannerViewHolder) holder).dotsIndicator.setDotsCount(mImageList.size());
             ((BannerViewHolder) holder).dotsIndicator.setViewPager(((BannerViewHolder) holder).viewPager);
+            bannerComponent.setAdapter(bannerAdapter);
 
 
         } else if (holder instanceof ListViewHolder) {
-            ItemAskAdapter itemAskAdapter = new ItemAskAdapter(context);;
+            ItemAskAdapter itemAskAdapter = new ItemAskAdapter(context);
             itemAskAdapter.setData(userBeans);
             ((ListViewHolder) holder).rvAskList.setAdapter(itemAskAdapter);
-            if (isAddItemDecoration==false){
+
+            if (isAddItemDecoration == false) {
                 ((ListViewHolder) holder).rvAskList.addItemDecoration(itemDecoration);
-                isAddItemDecoration=true;
+                isAddItemDecoration = true;
             }
             Log.i(TAG, "onBindViewHolder: add");
             ((ListViewHolder) holder).rvAskList.setLayoutManager(new LinearLayoutManager(context));
@@ -237,7 +243,7 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public int getItemCount() {
-        return userBeans.size();
+        return headerView == null ? userBeans.size() : userBeans.size() + 1;
     }
 
     protected class ListViewHolder extends RecyclerView.ViewHolder {
@@ -253,14 +259,17 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     protected class BannerViewHolder extends RecyclerView.ViewHolder {
         //private Banner banner;
         private ViewPager viewPager;
-        private DotsIndicator dotsIndicator;
+        //private AutoScrollViewPager viewPager;
+        //private BannerViewPager viewPager;
+        //private DotsIndicator dotsIndicator;
+        private Indicator dotsIndicator;
 
         public BannerViewHolder(View view) {
             super(view);
             //banner = (Banner) view.findViewById(R.id.banner);
             viewPager = (ViewPager) view.findViewById(R.id.vp_banner);
 
-            dotsIndicator = (DotsIndicator) view.findViewById(R.id.dots_indicator);
+            dotsIndicator = (Indicator) view.findViewById(R.id.banner_indicator);
 
         }
     }
@@ -361,4 +370,33 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             super(view);
         }
     }
+
+    private IndicatorViewPager.IndicatorViewPagerAdapter bannerAdapter = new IndicatorViewPager.IndicatorViewPagerAdapter() {
+        @Override
+        public int getCount() {
+            return mImageList.size();
+        }
+
+        @Override
+        public View getViewForTab(int position, View convertView, ViewGroup container) {
+            if (convertView == null) {
+                convertView = new View(container.getContext());
+            }
+            return convertView;
+        }
+
+        @Override
+        public View getViewForPage(int position, View convertView, ViewGroup container) {
+            if (convertView == null) {
+                //convertView = new ImageView(getActivity());
+                convertView = LayoutInflater.from(context).inflate(R.layout.item_banner, container, false);
+                convertView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            }
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.iv_banner);
+            //imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            Glide.with(context).load(mImageList.get(position)).into(imageView);
+            return convertView;
+        }
+
+    };
 }

@@ -59,5 +59,4 @@ public class FgMainFragment extends Fragment  {
         vp_main.setAdapter(adapter);
     }
 
-
 }
