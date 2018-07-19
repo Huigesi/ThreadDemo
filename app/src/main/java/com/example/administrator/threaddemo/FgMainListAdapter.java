@@ -2,7 +2,6 @@ package com.example.administrator.threaddemo;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,9 +13,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.example.administrator.threaddemo.mowen.Banner;
+import com.example.administrator.threaddemo.mowen.BannerConfig;
+import com.example.administrator.threaddemo.mowen.BannerDotsIndicator;
+import com.example.administrator.threaddemo.mowen.loader.ImageLoader;
 import com.example.administrator.threaddemo.viewPagerIndicator.BannerComponent;
-import com.example.administrator.threaddemo.viewPagerIndicator.Indicator;
 import com.example.administrator.threaddemo.viewPagerIndicator.IndicatorViewPager;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +79,7 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 return bannerView;
             } else {
                 View view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.banner, parent, false);
+                        .inflate(R.layout.banner_main, parent, false);
                 bannerView = new BannerViewHolder(view);
                 return bannerView;
             }
@@ -100,11 +103,7 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_recommend, parent, false);
             return new RecommendViewHolder(view);
-        } else if (viewType == TYPE_FOOTER) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.footer, parent, false);
-            return new FooterViewHolder(view);
-        } else {
+        }  else {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_list, parent, false);
             return new ListViewHolder(view);
@@ -115,21 +114,22 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
-        if (bannerComponent != null) {
+    /*    if (bannerComponent != null) {
             bannerComponent.setAutoPlayTime(2000);
             bannerComponent.startAutoPlay();
 
-        }
+        }*/
         if (holder instanceof BannerViewHolder) {
-            if (bannerComponent == null) {
+          /*  if (bannerComponent == null) {
                 bannerComponent = new BannerComponent(((BannerViewHolder) holder).dotsIndicator,
                         ((BannerViewHolder) holder).viewPager, false);
             }
             ((BannerViewHolder) holder).dotsIndicator.setDotsCount(mImageList.size());
             ((BannerViewHolder) holder).dotsIndicator.setViewPager(((BannerViewHolder) holder).viewPager);
-            bannerComponent.setAdapter(bannerAdapter);
-
-
+            bannerComponent.setAdapter(bannerAdapter);*/
+            ((BannerViewHolder) holder).viewPager.setImages(mImageList);
+            ((BannerViewHolder) holder).viewPager.start();
+            ((BannerViewHolder) holder).dotsIndicator.setViewPager(((BannerViewHolder) holder).viewPager.getViewPager());
         } else if (holder instanceof ListViewHolder) {
             ItemAskAdapter itemAskAdapter = new ItemAskAdapter(context);
             itemAskAdapter.setData(userBeans);
@@ -257,19 +257,27 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
 
     protected class BannerViewHolder extends RecyclerView.ViewHolder {
-        //private Banner banner;
-        private ViewPager viewPager;
+        //private Banner banner_main;
+        private Banner viewPager;
         //private AutoScrollViewPager viewPager;
         //private BannerViewPager viewPager;
         //private DotsIndicator dotsIndicator;
-        private Indicator dotsIndicator;
-
+        private BannerDotsIndicator dotsIndicator;
+        private SmartRefreshLayout refreshLayout;
         public BannerViewHolder(View view) {
             super(view);
-            //banner = (Banner) view.findViewById(R.id.banner);
-            viewPager = (ViewPager) view.findViewById(R.id.vp_banner);
 
-            dotsIndicator = (Indicator) view.findViewById(R.id.banner_indicator);
+            //banner_main = (Banner) view.findViewById(R.id.banner_main);
+            viewPager = (Banner) view.findViewById(R.id.banner_m);
+
+            dotsIndicator = (BannerDotsIndicator) view.findViewById(R.id.banner_indicator);
+            viewPager.setBannerStyle(BannerConfig.NOT_INDICATOR);
+            viewPager.setImageLoader(new ImageLoader() {
+                @Override
+                public void displayImage(Context context, Object path, ImageView imageView) {
+                    Glide.with(context).load(path).into(imageView);
+                }
+            });
 
         }
     }
@@ -364,12 +372,6 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
     }
 
-    protected class FooterViewHolder extends RecyclerView.ViewHolder {
-
-        public FooterViewHolder(View view) {
-            super(view);
-        }
-    }
 
     private IndicatorViewPager.IndicatorViewPagerAdapter bannerAdapter = new IndicatorViewPager.IndicatorViewPagerAdapter() {
         @Override

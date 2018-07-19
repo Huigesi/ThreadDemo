@@ -1,11 +1,11 @@
-package com.example.administrator.threaddemo;
+package com.example.administrator.threaddemo.mowen;
 
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import android.support.annotation.Nullable;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -16,14 +16,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.example.administrator.threaddemo.viewPagerIndicator.Indicator;
-import com.example.administrator.threaddemo.viewPagerIndicator.ScrollBar;
+import com.example.administrator.threaddemo.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DotsIndicator extends LinearLayout implements Indicator {
+
+public class BannerDotsIndicator extends LinearLayout {
     private static final String TAG = "DotsIndicator";
+
     private static final int DEFAULT_POINT_COLOR = Color.CYAN;
     public static final float DEFAULT_WIDTH_FACTOR = 2.5f;
 
@@ -35,30 +36,21 @@ public class DotsIndicator extends LinearLayout implements Indicator {
     private int currentPage;
     private float dotsWidthFactor;
     private int dotsColor;
-    private int dotsCount;
-
-    public int getDotsCount() {
-        return dotsCount;
-    }
-
-    public void setDotsCount(int dotsCount) {
-        this.dotsCount = dotsCount;
-    }
 
     private boolean dotsClickable;
     private ViewPager.OnPageChangeListener pageChangedListener;
 
-    public DotsIndicator(Context context) {
+    public BannerDotsIndicator(Context context) {
         super(context);
         init(context, null);
     }
 
-    public DotsIndicator(Context context, AttributeSet attrs) {
+    public BannerDotsIndicator(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs);
     }
 
-    public DotsIndicator(Context context, AttributeSet attrs, int defStyleAttr) {
+    public BannerDotsIndicator(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
@@ -110,24 +102,25 @@ public class DotsIndicator extends LinearLayout implements Indicator {
     private void refreshDots() {
         if (viewPager != null && viewPager.getAdapter() != null) {
             // Check if we need to refresh the dots count
-            // TODO: 2018/7/17 viewPager.getAdapter().getCount()
-            if (dots.size() < dotsCount) {
-                addDots(dotsCount - dots.size());
-            } else if (dots.size() > dotsCount) {
-                removeDots(dots.size() - dotsCount);
+            PagerAdapter adapter = viewPager.getAdapter();
+            int count = adapter instanceof Banner.BannerPagerAdapter ?
+                    Math.max(0, adapter.getCount() - 2) : adapter.getCount();
+            if (dots.size() < count) {
+                addDots(count - dots.size());
+            } else if (dots.size() > count) {
+                removeDots(dots.size() - count);
             }
             setUpDotsAnimators();
         } else {
-            Log.e(DotsIndicator.class.getSimpleName(),
+            Log.e(BannerDotsIndicator.class.getSimpleName(),
                     "You have to set an adapter to the view pager before !");
         }
     }
 
     private void addDots(int count) {
         for (int i = 0; i < count; i++) {
-            View dot = LayoutInflater.from(getContext()).inflate(R.layout.dot_layout,
-                    this, false);
-            ImageView imageView = dot.findViewById(R.id.dot);
+            View dot = LayoutInflater.from(getContext()).inflate(R.layout.dot_layout, this, false);
+            ImageView imageView = (ImageView) dot.findViewById(R.id.dot);
             RelativeLayout.LayoutParams params =
                     (RelativeLayout.LayoutParams) imageView.getLayoutParams();
             params.width = params.height = (int) dotsSize;
@@ -135,18 +128,18 @@ public class DotsIndicator extends LinearLayout implements Indicator {
             ((GradientDrawable) imageView.getBackground()).setCornerRadius(dotsCornerRadius);
             ((GradientDrawable) imageView.getBackground()).setColor(dotsColor);
 
-            final int finalI = i;
+            /*final int finalI = i;
             dot.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (dotsClickable
                             && viewPager != null
                             && viewPager.getAdapter() != null
-                            && finalI < dotsCount) {
+                            && finalI < viewPager.getAdapter().getCount()) {
                         viewPager.setCurrentItem(finalI, true);
                     }
                 }
-            });
+            });*/
 
             dots.add(imageView);
             addView(dot);
@@ -163,7 +156,11 @@ public class DotsIndicator extends LinearLayout implements Indicator {
     private void setUpDotsAnimators() {
         if (viewPager != null
                 && viewPager.getAdapter() != null
-                && dotsCount > 0) {
+                && viewPager.getAdapter().getCount() > 0) {
+            if (viewPager.getAdapter() instanceof Banner.BannerPagerAdapter) {
+                if (viewPager.getAdapter().getCount() <= 2)
+                    return;
+            }
             if (currentPage < dots.size()) {
                 View dot = dots.get(currentPage);
 
@@ -174,7 +171,8 @@ public class DotsIndicator extends LinearLayout implements Indicator {
                 }
             }
 
-            currentPage = viewPager.getCurrentItem();
+            currentPage = viewPager instanceof BannerViewPager ? viewPager.getCurrentItem() - 1
+                    : viewPager.getCurrentItem();
             if (currentPage >= dots.size()) {
                 currentPage = dots.size() - 1;
                 viewPager.setCurrentItem(currentPage, false);
@@ -194,31 +192,42 @@ public class DotsIndicator extends LinearLayout implements Indicator {
         }
     }
 
+    public int toRealPosition(int position) {
+        if (FP.empty(dots))
+            return position;
+        int realPosition = (position - 1) % FP.size(dots);
+        if (realPosition < 0)
+            realPosition += FP.size(dots);
+        return realPosition;
+    }
+
     private void setUpOnPageChangedListener() {
         pageChangedListener = new ViewPager.OnPageChangeListener() {
             private int lastPage;
 
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                int realPosition = (position+3 + dotsCount) % dotsCount;
-                //Log.i(TAG, "onPageScrolled realPosition: "+realPosition);
-               //   Log.i(TAG, "onPageScrolled: "+realPosition);
-                if (realPosition != currentPage && positionOffset == 0 || currentPage < realPosition) {
+//                lucency.logger.Log.d(TAG, "page scroll position " + position +
+//                        ", current page " + currentPage + ", last page " + lastPage);
+                if (viewPager instanceof BannerViewPager)
+                    position = toRealPosition(position);
+
+                if (position != currentPage && positionOffset == 0 || currentPage < position) {
                     setDotWidth(dots.get(currentPage), (int) dotsSize);
-                    currentPage = realPosition;
+                    currentPage = position;
                 }
 
-                if (Math.abs(currentPage - realPosition) > 1) {
+                if (Math.abs(currentPage - position) > 1) {
                     setDotWidth(dots.get(currentPage), (int) dotsSize);
                     currentPage = lastPage;
                 }
-                //Log.i(TAG, "onPageScrolled:currentPage "+currentPage);
 
                 ImageView dot = dots.get(currentPage);
+
                 ImageView nextDot = null;
-                if (currentPage == realPosition && currentPage + 1 < dots.size()) {
+                if (currentPage == position && currentPage + 1 < dots.size()) {
                     nextDot = dots.get(currentPage + 1);
-                } else if (currentPage > realPosition) {
+                } else if (currentPage > position) {
                     nextDot = dot;
                     dot = dots.get(currentPage - 1);
                 }
@@ -231,8 +240,8 @@ public class DotsIndicator extends LinearLayout implements Indicator {
                             (int) (dotsSize + (dotsSize * (dotsWidthFactor - 1) * (positionOffset)));
                     setDotWidth(nextDot, nextDotWidth);
                 }
-
-                lastPage = realPosition;
+                Log.i(TAG, "onPageScrolled: "+position);
+                lastPage = position;
             }
 
             private void setDotWidth(ImageView dot, int dotWidth) {
@@ -261,7 +270,7 @@ public class DotsIndicator extends LinearLayout implements Indicator {
 
     private void setUpViewPager() {
         if (viewPager.getAdapter() != null) {
-            viewPager.getAdapter().registerDataSetObserver(new android.database.DataSetObserver() {
+            viewPager.getAdapter().registerDataSetObserver(new DataSetObserver() {
                 @Override
                 public void onChanged() {
                     super.onChanged();
@@ -291,96 +300,5 @@ public class DotsIndicator extends LinearLayout implements Indicator {
         this.viewPager = viewPager;
         setUpViewPager();
         refreshDots();
-    }
-
-    @Override
-    public void setAdapter(IndicatorAdapter adapter) {
-
-    }
-
-    @Override
-    public void setOnItemSelectListener(OnItemSelectedListener onItemSelectedListener) {
-
-    }
-
-    @Override
-    public OnItemSelectedListener getOnItemSelectListener() {
-        return null;
-    }
-
-    @Override
-    public void setOnIndicatorItemClickListener(OnIndicatorItemClickListener onIndicatorItemClickListener) {
-
-    }
-
-    @Override
-    public OnIndicatorItemClickListener getOnIndicatorItemClickListener() {
-        return null;
-    }
-
-    @Override
-    public void setOnTransitionListener(OnTransitionListener onTransitionListener) {
-
-    }
-
-    @Override
-    public OnTransitionListener getOnTransitionListener() {
-        return null;
-    }
-
-    @Override
-    public void setScrollBar(ScrollBar scrollBar) {
-
-    }
-
-    @Override
-    public IndicatorAdapter getIndicatorAdapter() {
-        return null;
-    }
-
-    @Override
-    public void setCurrentItem(int item) {
-
-    }
-
-    @Override
-    public void setCurrentItem(int item, boolean anim) {
-
-    }
-
-    @Nullable
-    @Override
-    public View getItemView(int item) {
-        return null;
-    }
-
-    @Override
-    public int getCurrentItem() {
-        return 0;
-    }
-
-    @Override
-    public int getPreSelectItem() {
-        return 0;
-    }
-
-    @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int state) {
-
-    }
-
-    @Override
-    public void setItemClickable(boolean clickable) {
-
-    }
-
-    @Override
-    public boolean isItemClickable() {
-        return false;
     }
 }

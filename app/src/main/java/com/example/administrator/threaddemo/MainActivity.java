@@ -10,9 +10,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.administrator.threaddemo.popMenu.PopMenu;
+import com.example.administrator.threaddemo.popMenu.PopMenuItem;
+import com.example.administrator.threaddemo.popMenu.PopMenuItemListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private MyFragmentAdapter adapter;
     private ImageView img_main;
     private ImageView img_my;
+    private PopMenu mPopMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +50,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setCurrentItem(0);
 
         initContentFragment();
+        mPopMenu = new PopMenu.Builder().attachToActivity(MainActivity.this)
+                .addMenuItem(new PopMenuItem("文字", getResources().getDrawable(R.drawable.stars)))
+                .addMenuItem(new PopMenuItem("照片", getResources().getDrawable(R.drawable.stars)))
+                .addMenuItem(new PopMenuItem("文章", getResources().getDrawable(R.drawable.stars)))
+                .columnCount(3)
+                .setOnItemClickListener(new PopMenuItemListener() {
+                    @Override
+                    public void onItemClick(PopMenu popMenu, int position) {
+                        Toast.makeText(MainActivity.this, "你点击了第" + position + "个位置", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .build();
+        bottom_add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mPopMenu.isShowing()){
+                    mPopMenu.show();
+                }
+            }
+        });
     }
 
 

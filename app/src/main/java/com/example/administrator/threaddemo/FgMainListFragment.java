@@ -1,30 +1,35 @@
 package com.example.administrator.threaddemo;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
 import com.example.administrator.threaddemo.viewPagerIndicator.BannerComponent;
-import com.example.administrator.threaddemo.viewPagerIndicator.ColorBar;
 import com.example.administrator.threaddemo.viewPagerIndicator.Indicator;
-import com.example.administrator.threaddemo.viewPagerIndicator.IndicatorViewPager;
-import com.example.administrator.threaddemo.viewPagerIndicator.ScrollBar;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
+import com.scwang.smartrefresh.layout.listener.OnMultiPurposeListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 //FgMainListFragment
 public class FgMainListFragment extends Fragment {
     private static final String TAG = "FgMainListFragment";
+    @BindView(R.id.ref_main)
+    SmartRefreshLayout refMain;
+    Unbinder unbinder;
     private FgMainListAdapter adapter;
     private ViewPager viewPager, viewPager2;
 
@@ -49,8 +54,10 @@ public class FgMainListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-       // headView = LayoutInflater.from(getContext()).inflate(R.layout.banner, container, false);
-        return inflater.inflate(R.layout.fg_main_list, container, false);
+        // headView = LayoutInflater.from(getContext()).inflate(R.layout.banner_main, container, false);
+        View view = inflater.inflate(R.layout.fg_main_list, container, false);
+        unbinder = ButterKnife.bind(this, view);
+        return view;
     }
 
     @Override
@@ -61,9 +68,25 @@ public class FgMainListFragment extends Fragment {
        /* viewPager = (ViewPager) headView.findViewById(R.id.vp_banner);
         dotsIndicator = (Indicator) headView.findViewById(R.id.banner_indicator);*/
         //dotsIndicator.setScrollBar(new ColorBar(getActivity(), Color.WHITE, 8, ScrollBar.Gravity.CENTENT_BACKGROUND));
-
+        initRefresh();
 
         initData();
+    }
+
+    private void initRefresh() {
+        refMain.setOnRefreshListener(new OnRefreshListener() {
+            @Override
+            public void onRefresh(RefreshLayout refreshLayout) {
+                refMain.setNoMoreData(false);
+                refreshLayout.finishRefresh(2000, false);
+            }
+        });
+        refMain.setOnLoadMoreListener(new OnLoadMoreListener() {
+            @Override
+            public void onLoadMore(RefreshLayout refreshLayout) {
+                refMain.finishLoadMore(2000, false,false);
+            }
+        });
     }
 
     private void initData() {
@@ -115,4 +138,9 @@ public class FgMainListFragment extends Fragment {
 
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
 }
