@@ -1,6 +1,7 @@
 package com.example.administrator.threaddemo;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,12 +11,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.administrator.threaddemo.mowen.Banner;
 import com.example.administrator.threaddemo.mowen.BannerConfig;
 import com.example.administrator.threaddemo.mowen.BannerDotsIndicator;
+import com.example.administrator.threaddemo.mowen.listener.OnBannerListener;
 import com.example.administrator.threaddemo.mowen.loader.ImageLoader;
 import com.example.administrator.threaddemo.viewPagerIndicator.BannerComponent;
 import com.example.administrator.threaddemo.viewPagerIndicator.IndicatorViewPager;
@@ -146,6 +149,14 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             Glide.with(context).load(R.drawable.main).into(((HotAskViewHolder) holder).imgHotAsk);
             ItemHotAskListAdapter askListAdapter = new ItemHotAskListAdapter(context);
             List<HotAskBean> hotAskBeans = new ArrayList<HotAskBean>();
+            ((HotAskViewHolder) holder).linHot.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(context, AllAskActivity.class);
+                    context.startActivity(intent);
+                    Log.i(TAG, "onClick: tvHot");
+                }
+            });
             for (int i = 0; i < 3; i++) {
                 HotAskBean hotAskBean = new HotAskBean();
                 hotAskBean.setAnswer(i);
@@ -278,6 +289,26 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     Glide.with(context).load(path).into(imageView);
                 }
             });
+            viewPager.setOnBannerListener(new OnBannerListener() {
+                @Override
+                public void OnBannerClick(int position) {
+                    String url = null;
+                    switch (position) {
+                        case 0:
+                            url = "http://www.wanandroid.com/navi";
+                            break;
+                        case 1:
+                            url = "http://www.wanandroid.com/blog/show/2";
+                            break;
+                        case 2:
+                            url = "http://www.wanandroid.com/project";
+                            break;
+                    }
+                    Intent intent = new Intent(context, WebViewActivity.class);
+                    intent.putExtra("url", url);
+                    context.startActivity(intent);
+                }
+            });
 
         }
     }
@@ -286,12 +317,14 @@ public class FgMainListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         private ImageView imgHotAsk;
         private TextView tvHotTitle;
         private RecyclerView rvHotAsk;
+        private LinearLayout linHot;
 
         public HotAskViewHolder(View view) {
             super(view);
             imgHotAsk = (ImageView) view.findViewById(R.id.img_hot_ask);
             tvHotTitle = (TextView) view.findViewById(R.id.tv_hot_title);
             rvHotAsk = (RecyclerView) view.findViewById(R.id.rv_hot_ask);
+            linHot = (LinearLayout) view.findViewById(R.id.hot_ask);
         }
 
     }

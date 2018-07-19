@@ -20,7 +20,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Butter"></activity>
+        <activity android:name=".Butter" />
+        <activity android:name=".WebViewActivity" />
+        <activity android:name=".AllAskActivity"></activity>
     </application>
 
 </manifest>

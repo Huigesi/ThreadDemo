@@ -31,13 +31,23 @@
         android:layout_marginLeft="25dp">
 
     </android.support.v7.widget.RecyclerView>
-    <TextView
-        android:layout_below="@+id/rv_hot_ask"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tv_hot_ask"
-        android:text="查看更多 >"
-        android:textColor="@color/colorPrimary"
+        android:layout_below="@+id/rv_hot_ask"
         android:gravity="center"
-        />
+        android:layout_alignParentBottom="true"
+        android:id="@+id/hot_ask">
+        <TextView
+
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_hot_ask"
+            android:text="查看更多 >"
+            android:textColor="@color/colorPrimary"
+            android:gravity="center"
+            />
+    </LinearLayout>
+
 </RelativeLayout>
